@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +16,30 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+  }
+
+  String _savedData = "";
+
+  _loadSavedData() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      if(preferences.getString('data').isNotEmpty && preferences.getString('data')!= null) {
+        _savedData = preferences.getString("data");
+      } else{
+        _savedData = "Empty";
+      }
+    });
+  }
+
+  _saveMessage(String message) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("data", message);
+  }
 
   var _enterDataField = TextEditingController();
 
@@ -46,23 +71,33 @@ class MyAppState extends State<MyApp> {
               ),
               
               FlatButton(
-                  onPressed: () async{
+                  onPressed: () {
                     setState(() {
-                      writeData(_enterDataField.text);
+                      _saveMessage(_enterDataField.text);
+                      _loadSavedData();
                     });
                   },
                   child: Text("Save Data",style: TextStyle(color: Colors.white,fontSize: 20.0),),
                 color: Colors.greenAccent,
               ),
 
-              FutureBuilder(
+              Text(
+                "HI DATA:"+_savedData
+              )
+
+
+
+
+
+
+/*              FutureBuilder(
                 future: readData(),
                 builder: (BuildContext context,AsyncSnapshot<String> data){
                   if (data.hasData != null){
                     return Text(data.data.toString());
                   }
                 },
-              )
+              )*/
 
 
 
@@ -75,6 +110,11 @@ class MyAppState extends State<MyApp> {
   }
 
 }
+
+
+
+
+/*
 
 
 Future<String> get _localPath async{
@@ -102,4 +142,4 @@ Future<String> readData() async {
     debugPrint('Error: $e');
     return 'Error: $e';
   }
-}
+}*/
